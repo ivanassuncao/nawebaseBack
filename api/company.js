@@ -3,7 +3,7 @@ module.exports = app => {
 
     const { existsOrError } = app.api.validation
 
-    const save = (req, res) => {
+    const save = async (req, res) => {
         const company = { 
             id: req.body.id,
             name_company: req.body.name_company,
@@ -34,13 +34,18 @@ module.exports = app => {
             existsOrError(company.cnpj, 'CNPJ não informado')
 
             if(company.id) {
-                app.db('companys')
+              await app.db('companys')
                     .update(company)
                     .where({ id: company.id })
                     .then(_ => res.status(204).send())
                     .catch(err => res.status(500).send(err))
             } else {
-                app.db('companys')
+
+                const subcnpj= await app.db('companys')
+                .where({ cnpj: company.cnpj })
+                notExistsOrError(subcnpj, 'CNPJ já existe.')
+
+              await app.db('companys')
                     .insert(company)
                     .then(_ => res.status(204).send())
                     .catch(err => res.status(500).send(err))

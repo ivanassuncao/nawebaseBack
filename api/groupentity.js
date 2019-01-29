@@ -2,7 +2,7 @@ module.exports = app => {
 
     const { existsOrError, notExistsOrError } = app.api.validation
 
-    const save  = (req, res) => {
+    const save  = async (req, res) => {
 
         const groupentity = { 
             id: req.body.id,
@@ -18,17 +18,23 @@ module.exports = app => {
         if(req.params.id) groupentity.id = req.params.id
 
         try {
+
             existsOrError(groupentity.name, 'Nome não informado')
             existsOrError(groupentity.internal_code_group_entity, 'Código não informado')
 
             if(groupentity.id) {
-                app.db('groupentitys')
+              await app.db('groupentitys')
                     .update(groupentity)
                     .where({ id: groupentity.id })
                     .then(_ => res.status(204).send())
                     .catch(err => res.status(500).send(err))
             } else {
-                app.db('groupentitys')
+
+                const subInternal= await app.db('groupentitys')
+                .where({ internal_code_group_entity: groupentity.internal_code_group_entity })
+                notExistsOrError(subInternal, 'Código Interno já existe.')
+
+              await app.db('groupentitys')
                     .insert(groupentity)
                     .then(_ => res.status(204).send())
                     .catch(err => res.status(500).send(err))

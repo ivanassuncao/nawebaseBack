@@ -4,7 +4,7 @@ module.exports = app => {
 
     const { existsOrError } = app.api.validation
 
-    const save = (req, res) => {
+    const save = async (req, res) => {
 
         if(req.body.ctps_date) req.body.ctps_date = moment(req.body.ctps_date).format("YYYY-MM-DD")
         if(req.body.rg_date) req.body.rg_date = moment(req.body.rg_date).format("YYYY-MM-DD")
@@ -50,16 +50,16 @@ module.exports = app => {
 
             
         if(employee.id) {
-            app.db('employees')
-                .update(employee)
-                .where({ id: employee.id })
-                .then(_ => res.status(204).send())
-                .catch(err => res.status(500).send(err))
+            await app.db('employees')
+                    .update(employee)
+                    .where({ id: employee.id })
+                    .then(_ => res.status(204).send())
+                    .catch(err => res.status(500).send(err))
         } else {
-            app.db('employees')
-                .insert(employee)
-                .then(_ => res.status(204).send())
-                .catch(err => res.status(500).send(err))
+            await app.db('employees')
+                    .insert(employee)
+                    .then(_ => res.status(204).send())
+                    .catch(err => res.status(500).send(err))
         }
 
          } catch(msg) {

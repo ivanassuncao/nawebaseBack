@@ -19,20 +19,22 @@ module.exports = app => {
             equalsOrError(user.password, user.confirmPassword,
                 'Senhas não conferem')
 
+            user.password = encryptPassword(user.password)
+            delete user.confirmPassword
+    
+            if(user.id) {
+               await app.db('users')
+                        .update({password: user.password})
+                        .where({ id: user.id })
+                        .then(_ => res.status(204).send())
+                        .catch(err => res.status(500).send(err))
+            }      
+
         } catch(msg) {
             return res.status(400).send(msg)
         }
 
-        user.password = encryptPassword(user.password)
-        delete user.confirmPassword
-
-        if(user.id) {
-            app.db('users')
-                .update({password: user.password})
-                .where({ id: user.id })
-                .then(_ => res.status(204).send())
-                .catch(err => res.status(500).send(err))
-        } 
+       
     }
 
     const blocked = async(req,res)=>{
@@ -43,11 +45,11 @@ module.exports = app => {
         if(!req.user || !req.user.admin) user.admin = false
 
         if(user.id) {
-            app.db('users')
-                .update({blocked: 1})
-                .where({ id: user.id })
-                .then(_ => res.status(204).send())
-                .catch(err => res.status(500).send(err))
+           await app.db('users')
+                    .update({blocked: 1})
+                    .where({ id: user.id })
+                    .then(_ => res.status(204).send())
+                    .catch(err => res.status(500).send(err))
         } 
     }
 
@@ -60,11 +62,11 @@ module.exports = app => {
         if(!req.user || !req.user.admin) user.admin = false
 
         if(user.id) {
-            app.db('users')
-                .update({blocked: 0})
-                .where({ id: user.id })
-                .then(_ => res.status(204).send())
-                .catch(err => res.status(500).send(err))
+           await app.db('users')
+                    .update({blocked: 0})
+                    .where({ id: user.id })
+                    .then(_ => res.status(204).send())
+                    .catch(err => res.status(500).send(err))
         } 
     }
 
@@ -89,7 +91,7 @@ module.exports = app => {
             }
 
             if(user.id) {
-                app.db('users')
+               await app.db('users')
                     .update(user)
                     .where({ id: user.id })
                     .then(_ => res.status(204).send())
@@ -99,10 +101,10 @@ module.exports = app => {
                 user.password = encryptPassword(user.password)
                 delete user.confirmPassword
         
-                app.db('users')
-                    .insert(user)
-                    .then(_ => res.status(204).send())
-                    .catch(err => res.status(500).send(err))
+              await  app.db('users')
+                        .insert(user)
+                        .then(_ => res.status(204).send())
+                        .catch(err => res.status(500).send(err))
             }
 
         } catch(msg) {

@@ -1,7 +1,7 @@
 module.exports = app => {
     const { existsOrError, notExistsOrError } = app.api.validation
 
-    const save  = (req, res) => {
+    const save  = async (req, res) => {
 
         const office = {    
             id: req.body.id,
@@ -16,16 +16,16 @@ module.exports = app => {
             existsOrError(office.name, 'Nome não informada...')
 
             if(office.id) {
-                app.db('offices')
-                    .update(office)
-                    .where({ id: office.id })
-                    .then(_ => res.status(204).send())
-                    .catch(err => res.status(500).send(err))
+              await  app.db('offices')
+                        .update(office)
+                        .where({ id: office.id })
+                        .then(_ => res.status(204).send())
+                        .catch(err => res.status(500).send(err))
             } else {
-                app.db('offices')
-                    .insert(office)
-                    .then(_ => res.status(204).send())
-                    .catch(err => res.status(500).send(err))
+               await app.db('offices')
+                        .insert(office)
+                        .then(_ => res.status(204).send())
+                        .catch(err => res.status(500).send(err))
             }
 
         } catch(msg) {

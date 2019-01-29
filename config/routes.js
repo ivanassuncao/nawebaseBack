@@ -163,7 +163,7 @@ module.exports = app => {
        .all(app.config.passport.authenticate())
        .get(app.api.item.getByGroupItem)
 
-   // Entity    
+   // Entitys    
 
    app.route('/entitys')
         .all(app.config.passport.authenticate())

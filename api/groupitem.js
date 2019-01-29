@@ -22,18 +22,21 @@ module.exports = app => {
             existsOrError(groupitem.name, 'Nome não informado')
             existsOrError(groupitem.internal_code_group_item, 'Código não informado')
 
-            const subInternal= await app.db('groupitems')
-            .where({ internal_code_group_item: groupitem.internal_code_group_item })
-            notExistsOrError(subInternal, 'Código Interno já existe.')
+         
 
             if(groupitem.id) {
-                app.db('groupitems')
-                    .update(groupitem)
-                    .where({ id: groupitem.id })
-                    .then(_ => res.status(204).send())
-                    .catch(err => res.status(500).send(err))
+                await  app.db('groupitems')
+                        .update(groupitem)
+                        .where({ id: groupitem.id })
+                        .then(_ => res.status(204).send())
+                        .catch(err => res.status(500).send(err))
             } else {
-                app.db('groupitems')
+
+                const subInternal= await app.db('groupitems')
+                .where({ internal_code_group_item: groupitem.internal_code_group_item })
+                notExistsOrError(subInternal, 'Código Interno já existe.')
+
+                await app.db('groupitems')
                     .insert(groupitem)
                     .then(_ => res.status(204).send())
                     .catch(err => res.status(500).send(err))

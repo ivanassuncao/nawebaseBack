@@ -1,9 +1,10 @@
 
 module.exports = app => {
 
-    const { existsOrError } = app.api.validation
+    const { existsOrError,notExistsOrError } = app.api.validation
 
-    const save = (req, res) => {
+    const save = async (req, res) => {
+
         const entity = { 
             id: req.body.id,
             name_entity: req.body.name_entity,
@@ -36,14 +37,23 @@ module.exports = app => {
             existsOrError(entity.name_entity, 'Nome não informado')
             existsOrError(entity.cnpj_cpf, 'CPF/CNPJ não informado')
 
+           
+
             if(entity.id) {
-                app.db('entitys')
+
+                await  app.db('entitys')
                     .update(entity)
                     .where({ id: entity.id })
                     .then(_ => res.status(204).send())
                     .catch(err => res.status(500).send(err))
+                    
             } else {
-                app.db('entitys')
+
+                const subcnpjcpf= await app.db('entitys')
+                .where({ cnpj_cpf: entity.cnpj_cpf })
+                notExistsOrError(subcnpjcpf, 'CPF/CNPJ já existe.')
+
+                await app.db('entitys')
                     .insert(entity)
                     .then(_ => res.status(204).send())
                     .catch(err => res.status(500).send(err))
@@ -88,7 +98,16 @@ module.exports = app => {
             .catch(err => res.status(500).send(err))
     }
 
-    return { save, remove, get, getById,setentity }
+    const getByGroupEntity = async (req, res) => {
+
+        app.db('entitys')
+            .where({group_entity_id: req.params.id})
+            .orderBy('name_entity')
+            .then(entitys => res.json(entitys))
+            .catch(err => res.status(500).send(err))
+    }
+
+    return { save, remove, get, getById,getByGroupEntity }
 
 
 }

@@ -1,7 +1,7 @@
 module.exports = app => {
-    const { existsOrError } = app.api.validation
+    const { existsOrError, notExistsOrError } = app.api.validation
 
-    const save = (req, res) => {
+    const save = async (req, res) => {
         const item = {  
             id: req.body.id,
             name: req.body.name,
@@ -20,23 +20,31 @@ module.exports = app => {
 
         try {
             existsOrError(item.name, 'Nome não informado...')
-        } catch(msg) {
-            res.status(400).send(msg)
-        }
 
-        
+             
         if(item.id) {
-            app.db('items')
+            await app.db('items')
                 .update(item)
                 .where({ id: item.id })
                 .then(_ => res.status(204).send())
                 .catch(err => res.status(500).send(err))
         } else {
-            app.db('items')
+
+            const subname= await app.db('items')
+            .where({ name: item.name })
+            notExistsOrError(subname, 'Nome já existe.')
+
+            await app.db('items')
                 .insert(item)
                 .then(_ => res.status(204).send())
                 .catch(err => res.status(500).send(err))
         }
+
+        } catch(msg) {
+            res.status(400).send(msg)
+        }
+
+       
 
     }
 
