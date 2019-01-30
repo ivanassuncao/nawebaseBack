@@ -3,6 +3,7 @@ const jwt = require('jwt-simple')
 const bcrypt = require('bcrypt-nodejs')
 
 module.exports = app => {
+
     const signin = async (req, res) => {
         if (!req.body.email || !req.body.password) {
             return res.status(400).send('Informe usuário e senha!')
@@ -16,7 +17,7 @@ module.exports = app => {
         if (!user) return res.status(400).send('Usuário não encontrado ou bloqueado!')
 
         const isMatch = bcrypt.compareSync(req.body.password, user.password)
-        if (!isMatch) return res.status(401).send('Email/Senha inválidos!')
+        if (!isMatch) return res.status(400).send('Email/Senha inválidos!')
 
         const now = Math.floor(Date.now() / 1000)
 

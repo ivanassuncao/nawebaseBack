@@ -11,6 +11,8 @@ module.exports = app => {
     app.get('/citys/:id',app.api.util.getCitys)
     app.put('/blocked/:id',app.api.user.blocked)
     app.put('/unBlocked/:id',app.api.user.unBlocked)
+    app.get('/registrationEmployee/:registration',app.api.employee.getByRegistration)
+    app.post('/employeeSignin',app.api.employee.employeeSignin)
 
     app.route('/users')
         .all(app.config.passport.authenticate())
@@ -180,6 +182,22 @@ module.exports = app => {
         .all(app.config.passport.authenticate())
         .get(app.api.entity.getByGroupEntity)  
 
+    // EletronicPoints 
+
+    app.route('/eletronicpoints')
+    .all(app.config.passport.authenticate())
+    .get(app.api.eletronicpoint.get)
+    .post(app.api.eletronicpoint.save)
+
+    app.route('/eletronicpoints/:id')
+        .all(app.config.passport.authenticate())
+        .get(app.api.eletronicpoint.getById)
+        .put(app.api.eletronicpoint.save)
+        .delete(app.api.eletronicpoint.remove)      
+
+    app.route('/eletronicpoints/:id/employees')
+        .all(app.config.passport.authenticate())
+        .get(app.api.eletronicpoint.getByIdDate)        
 
       // Vendedor 
 

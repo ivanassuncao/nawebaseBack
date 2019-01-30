@@ -4,11 +4,11 @@ module.exports = app => {
     const { existsOrError, notExistsOrError, equalsOrError } = app.api.validation
 
     const encryptPassword = password => {
-        const salt = bcrypt.genSaltSync(10)
-        return bcrypt.hashSync(password, salt)
+        const salt_ = bcrypt.genSaltSync(10)
+        return bcrypt.hashSync(password, salt_)
     }
 
-    const passwordChange = async(req,res)=>{
+    const passwordChange = async (req,res)=>{
         const user = { ...req.body }
         if(req.params.id) user.id = req.params.id
 
@@ -21,14 +21,16 @@ module.exports = app => {
 
             user.password = encryptPassword(user.password)
             delete user.confirmPassword
-    
+           
+            console.log(user.password)
+
             if(user.id) {
-               await app.db('users')
-                        .update({password: user.password})
-                        .where({ id: user.id })
-                        .then(_ => res.status(204).send())
-                        .catch(err => res.status(500).send(err))
-            }      
+             await  app.db('users')
+                    .update({password: user.password})
+                    .where({ id: user.id })
+                    .then(_ => res.status(204).send())
+                    .catch(err => res.status(500).send(err))
+        }      
 
         } catch(msg) {
             return res.status(400).send(msg)
@@ -101,7 +103,7 @@ module.exports = app => {
                 user.password = encryptPassword(user.password)
                 delete user.confirmPassword
         
-              await  app.db('users')
+              await app.db('users')
                         .insert(user)
                         .then(_ => res.status(204).send())
                         .catch(err => res.status(500).send(err))

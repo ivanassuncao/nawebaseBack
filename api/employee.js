@@ -1,8 +1,9 @@
 const moment = require('moment')
+const bcrypt = require('bcrypt-nodejs')
 
 module.exports = app => {
 
-    const { existsOrError } = app.api.validation
+    const { existsOrError, equalsOrError } = app.api.validation
 
     const save = async (req, res) => {
 
@@ -99,7 +100,48 @@ module.exports = app => {
             .catch(err => res.status(500).send(err))
     }
 
-    return { save, remove, get, getById }
+    const getByRegistration = (req, res) => {
+        app.db('employees')
+            .innerJoin('users', 'users.id', 'employees.user_id')
+            .where({registration: req.params.registration})
+            .first()
+            .then(employee => res.json(employee))
+            .catch(err => res.status(500).send(err))
+    }
+
+    const employeeSignin = async (req, res) => {
+
+    try {
+
+        if (!req.body.user_id) {
+            return res.status(400).send('Funcionário não tem um usuário associado!')
+        }
+
+        if (!req.body.passwordconfirm) {
+            return res.status(400).send('Informe a senha!')
+        }
+        
+        const user = await app.db('users')
+            .where({ id: req.body.user_id })
+            .andWhere({ blocked: 0})
+            .first()
+
+        if (!user) return res.status(400).send('Usuário não encontrado ou bloqueado!')    
+
+        const isMatch = bcrypt.compareSync(req.body.passwordconfirm,user.password)
+
+        if (!isMatch){
+            return res.status(400).send('Senha inválida!')
+        } 
+        else{
+                return  res.status(204).send()
+            }
+        } catch(msg) {
+            res.status(400).send(msg)
+        }
+    }
+
+    return { save, remove, get, getById,getByRegistration,employeeSignin}
 
 
 }
