@@ -1,7 +1,7 @@
 
 module.exports = app => {
 
-    const { existsOrError } = app.api.validation
+    const { existsOrError, notExistsOrError } = app.api.validation
 
     const save = async (req, res) => {
         const company = { 
@@ -45,10 +45,10 @@ module.exports = app => {
                 .where({ cnpj: company.cnpj })
                 notExistsOrError(subcnpj, 'CNPJ já existe.')
 
-              await app.db('companys')
-                    .insert(company)
-                    .then(_ => res.status(204).send())
-                    .catch(err => res.status(500).send(err))
+                await app.db('companys')
+                        .insert(company)
+                        .then(_ => res.status(204).send())
+                        .catch(err => res.status(500).send(err))
             }
 
             

@@ -5,6 +5,7 @@ module.exports = app => {
     const { existsOrError, notExistsOrError } = app.api.validation
 
     const dateNow = new Date()
+    this.dateNow = moment(dateNow).format("YYYY-MM-DD")
 
     const save  = async (req, res) => {
 
@@ -80,8 +81,8 @@ module.exports = app => {
     const getByIdDate = async (req, res) => {
        await app.db('eletronicpoints')
             .where({ employee_id: req.params.id })
-            .andWhere({date: dateNow})
-            .orderBy('time', 'desc')
+            .andWhere({date: this.dateNow})
+            .orderBy('register', 'desc')
             .then(eletronicpoints => res.json(eletronicpoints))
             .catch(err => res.status(500).send(err))
     }
